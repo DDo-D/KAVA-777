@@ -1,13 +1,9 @@
 /**
- * KPIC MCP 래퍼.
- * vendor/kpic-mcp가 노출하는 두 tool:
- *   - search_drugs_by_name(drugname)
- *   - get_drug_detail_by_id(drugcode)
- *
- * 각 tool은 content[0].text 에 JSON 문자열을 반환한다.
+ * KPIC 약품 검색 — health.kr 직접 호출.
+ * (기존 MCP stdio 방식에서 직접 fetch로 교체)
  */
 
-import { getKpicClient } from "./client";
+import { searchDrugsRaw } from "../kpic-api";
 import type { NormalizedDrug } from "../types";
 
 interface KpicSearchRaw {
@@ -25,31 +21,6 @@ interface KpicSearchRaw {
   pack_img?: string;
   drug_pic?: string;
   boh_price?: string;
-}
-
-function extractTextPayload(result: unknown): string {
-  if (
-    result &&
-    typeof result === "object" &&
-    "content" in result &&
-    Array.isArray((result as { content: unknown[] }).content)
-  ) {
-    const content = (result as { content: Array<{ type?: string; text?: string }> })
-      .content;
-    const first = content.find((c) => c?.type === "text" && typeof c.text === "string");
-    if (first?.text) return first.text;
-  }
-  throw new Error("KPIC MCP returned unexpected payload shape");
-}
-
-function safeParseArray(text: string): unknown[] {
-  try {
-    const parsed = JSON.parse(text);
-    if (Array.isArray(parsed)) return parsed;
-    return [];
-  } catch {
-    return [];
-  }
 }
 
 function normalizeDrug(raw: KpicSearchRaw): NormalizedDrug {
@@ -70,21 +41,7 @@ function normalizeDrug(raw: KpicSearchRaw): NormalizedDrug {
   };
 }
 
-/**
- * 약품명/키워드로 검색. KPIC API 자체가 이름·성분·효능 통합 검색이므로
- * 호출은 동일하고, 결과 필터링/스코어링은 호출자가 수행.
- */
 export async function searchDrugs(query: string): Promise<NormalizedDrug[]> {
-  const client = await getKpicClient();
-  const result = await client.callTool({
-    name: "search_drugs_by_name",
-    arguments: { drugname: query },
-  });
-
-  const text = extractTextPayload(result);
-  const arr = safeParseArray(text) as KpicSearchRaw[];
-
-  return arr
-    .map(normalizeDrug)
-    .filter((d) => d.code && d.name);
+  const arr = (await searchDrugsRaw(query)) as KpicSearchRaw[];
+  return arr.map(normalizeDrug).filter((d) => d.code && d.name);
 }
