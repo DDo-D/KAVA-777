@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}대기화면{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>상장사 재무정보 추출</h1>
+  <p class="lead">
+    <a href="https://github.com/0gam-song/KAVA-777" target="_blank" rel="noopener">KAVA</a>에서
+    약품을 검색해 나온 <strong>제조사</strong>를 자동으로 모아 yfinance로
+    <strong>EBITDA · EV · EV/EBITDA · PER</strong>을 병렬 계산합니다.
+  </p>
+</section>
+
+{% if error %}
+<div class="alert alert-error" role="alert">{{ error }}</div>
+{% endif %}
+
+<section class="panel kava-panel">
+  <h2 class="panel-title">① KAVA 약품 검색 → 제조사 재무 추출</h2>
+  <p class="panel-desc">
+    KAVA 서버(<code>KAVA_API_URL</code>, 기본 <code>http://127.0.0.1:3000</code>)가
+    실행 중이어야 합니다. (<code>pnpm setup-mcps && pnpm dev</code>)
+  </p>
+
+  <form class="kava-form" method="post" action="{{ url_for('kava_search') }}">
+    <div class="kava-row">
+      <label for="kava_query">약품 검색어</label>
+      <input
+        type="text"
+        id="kava_query"
+        name="kava_query"
+        value="{{ kava_query or '' }}"
+        placeholder="예: 타이레놀, 아세트아미노펜"
+        required
+      />
+    </div>
+    <div class="kava-row kava-type-row">
+      <span class="label-inline">검색 유형</span>
+      <label><input type="radio" name="kava_type" value="name" {% if (kava_type or 'name') == 'name' %}checked{% endif %}> 약품명</label>
+      <label><input type="radio" name="kava_type" value="ingredient" {% if kava_type == 'ingredient' %}checked{% endif %}> 성분</label>
+      <label><input type="radio" name="kava_type" value="efficacy" {% if kava_type == 'efficacy' %}checked{% endif %}> 효능</label>
+    </div>
+    <div class="kava-actions">
+      <button type="submit" class="btn-primary">제조사 목록 보기</button>
+    </div>
+  </form>
+</section>
+
+<hr class="section-divider" />
+
+<section class="panel">
+  <h2 class="panel-title">② 제조사명 직접 입력</h2>
+  <form class="extract-form" method="post" action="{{ url_for('extract') }}">
+    <label for="companies">상장사명 (한 줄에 하나, 또는 쉼표로 구분)</label>
+    <textarea
+      id="companies"
+      name="companies"
+      rows="10"
+      placeholder="예시&#10;삼성전자&#10;종근당&#10;유한양행"
+    >{{ companies or '' }}</textarea>
+    <p class="hint">
+      원시: 영업이익 · 감가상각비 · 무형자산상각비 · 시가총액 · 총차입금 · 현금 · 당기순이익
+      · 산출: EBITDA · EV · EV/EBITDA · PER
+    </p>
+    <button type="submit" class="btn-primary">재무정보 추출 시작</button>
+  </form>
+</section>
+
+<section class="info-grid">
+  <article>
+    <h3>EBITDA</h3>
+    <p>영업이익 + 감가상각비 + 무형자산상각비</p>
+  </article>
+  <article>
+    <h3>EV / EV·EBITDA</h3>
+    <p>시가총액 + 총차입금 − 현금및현금성자산</p>
+  </article>
+  <article>
+    <h3>PER</h3>
+    <p>시가총액 ÷ 당기순이익</p>
+  </article>
+</section>
+{% endblock %}

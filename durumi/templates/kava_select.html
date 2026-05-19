@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}KAVA 제조사 선택{% endblock %}
+{% block content %}
+<section class="results-header">
+  <h1>KAVA 검색: 「{{ kava.query }}」</h1>
+  <p class="lead">
+    약품 {{ kava.drug_count }}건 · 제조사 {{ kava.manufacturers|length }}곳
+    {% if kava.generic_expanded and kava.generic_ingredient %}
+    · 제네릭 확장: {{ kava.generic_ingredient }}
+    {% endif %}
+  </p>
+</section>
+
+{% for w in kava.warnings %}
+<div class="alert alert-warn">{{ w }}</div>
+{% endfor %}
+
+<form method="post" action="{{ url_for('kava_extract') }}">
+  <input type="hidden" name="kava_query" value="{{ kava_query }}" />
+  <input type="hidden" name="kava_type" value="{{ kava_type }}" />
+  <input type="hidden" name="kava_limit" value="{{ kava_limit }}" />
+
+  <div class="mfr-toolbar">
+    <label class="check-all">
+      <input type="checkbox" id="check-all" checked /> 전체 선택
+    </label>
+    <a href="{{ url_for('index') }}" class="btn-secondary">다시 검색</a>
+  </div>
+
+  <ul class="mfr-list">
+    {% for m in kava.manufacturers %}
+    <li>
+      <label>
+        <input
+          type="checkbox"
+          name="manufacturers"
+          value="{{ m.display_name }}"
+          class="mfr-cb"
+          checked
+        />
+        <span class="mfr-name">{{ m.display_name }}</span>
+        <span class="mfr-count">약품 {{ m.drug_count }}건</span>
+      </label>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <div class="kava-actions">
+    <button type="submit" class="btn-primary">선택 제조사 재무정보 추출</button>
+  </div>
+</form>
+
+<script>
+  const all = document.getElementById("check-all");
+  const boxes = document.querySelectorAll(".mfr-cb");
+  all?.addEventListener("change", () => {
+    boxes.forEach((cb) => { cb.checked = all.checked; });
+  });
+</script>
+{% endblock %}

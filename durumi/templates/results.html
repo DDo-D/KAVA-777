@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}결과{% endblock %}
+{% block content %}
+{% if kava_meta %}
+<div class="alert alert-info">
+  KAVA 검색 「{{ kava_meta.query }}」({{ kava_meta.type }}) · 약품 {{ kava_meta.drug_count }}건에서 제조사 재무 추출
+</div>
+{% endif %}
+
+<section class="results-header">
+  <h1>추출 결과 ({{ count }}개 회사)</h1>
+  <div class="actions">
+    <a href="{{ url_for('index') }}" class="btn-secondary">다시 입력</a>
+    <form method="post" action="{{ url_for('download_csv') }}" class="inline-form">
+      <button type="submit" class="btn-primary">CSV 다운로드</button>
+    </form>
+  </div>
+</section>
+
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr>
+        {% for col in columns %}
+        <th>{{ col }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr class="{% if row['오류'] %}row-error{% endif %}">
+        {% for col in columns %}
+        <td class="{% if col not in ['입력회사명','법인명','종목코드','Yahoo티커','재무기준','결산일','통화','오류'] %}num{% endif %}">
+          {{ row[col] }}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<section class="csv-preview">
+  <h2>CSV 미리보기</h2>
+  <pre class="csv-block">{{ csv_text }}</pre>
+</section>
+{% endblock %}

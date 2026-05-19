@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>{% block title %}두루미{% endblock %} — yfinance 재무 추출</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+  <header class="site-header">
+
+    <a href="{{ url_for('index') }}" class="logo">두루미</a>
+
+    <span class="tagline">KAVA 약품검색 → yfinance 재무</span>
+
+  </header>
+
+  <main class="container">
+
+    {% block content %}{% endblock %}
+
+  </main>
+
+</body>
+
+</html>
+
