@@ -24,7 +24,7 @@ fi
 
 if [ ! -f "$KPIC_DIR/dist/index.js" ]; then
   log "installing KPIC MCP deps + building"
-  (cd "$KPIC_DIR" && pnpm install --ignore-workspace --silent && pnpm build)
+  (cd "$KPIC_DIR" && NODE_ENV=development pnpm install --ignore-workspace --silent && pnpm build)
 else
   log "KPIC MCP dist/index.js already present, skipping build"
 fi
