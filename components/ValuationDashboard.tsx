@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import SearchBar from "./SearchBar";
 import CompanyResults from "./CompanyResults";
@@ -21,6 +22,7 @@ const SUGGESTED_KEYWORDS: ReadonlyArray<string> = [
 ];
 
 export default function ValuationDashboard() {
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState<string>("");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
@@ -37,8 +39,17 @@ export default function ValuationDashboard() {
 
   const averages = useMemo(() => computeAverages(selectedCompanies), [selectedCompanies]);
 
-  const handleSubmit = useCallback(async () => {
-    const q = query.trim();
+  useEffect(() => {
+    const q = searchParams.get("q");
+    if (q) {
+      setQuery(q);
+      handleSubmit(q);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSubmit = useCallback(async (forceQuery?: string) => {
+    const q = (forceQuery ?? query).trim();
     if (!q) return;
 
     // 이전 요청 취소

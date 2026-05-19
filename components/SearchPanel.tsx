@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import type { SearchResponse, SearchType } from "@/lib/types";
 import { DrugList } from "./DrugList";
 import { ManufacturerList } from "./ManufacturerList";
@@ -127,11 +128,19 @@ export function SearchPanel() {
             <DrugList drugs={data.drugs} />
           </section>
           <aside>
-            <SectionHeader
-              title="제약회사"
-              count={data.manufacturers.length}
-              subtitle="제조사별 dedupe 결과"
-            />
+            <div className="flex items-center justify-between mb-3">
+              <SectionHeader
+                title="제약회사"
+                count={data.manufacturers.length}
+                subtitle="제조사별 dedupe 결과"
+              />
+              <Link
+                href={`/screener?q=${encodeURIComponent(data.query)}`}
+                className="shrink-0 ml-2 rounded-lg px-3 py-1.5 text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition"
+              >
+                밸류에이션 →
+              </Link>
+            </div>
             <ManufacturerList manufacturers={data.manufacturers} />
           </aside>
         </div>

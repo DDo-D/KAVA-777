@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import ValuationDashboard from "@/components/ValuationDashboard";
 
 export const metadata: Metadata = {
@@ -10,7 +11,9 @@ export const metadata: Metadata = {
 export default function ScreenerPage() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
-      <ValuationDashboard />
+      <Suspense>
+        <ValuationDashboard />
+      </Suspense>
     </main>
   );
 }
