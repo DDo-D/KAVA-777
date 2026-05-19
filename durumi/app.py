@@ -185,6 +185,17 @@ def api_kava_search():
     return jsonify(payload)
 
 
+@app.route("/api/extract", methods=["POST"])
+def api_extract():
+    """JSON: 회사명 목록 → yfinance 재무 추출."""
+    body = request.get_json(silent=True) or {}
+    companies = [n.strip() for n in (body.get("companies") or []) if n.strip()]
+    if not companies:
+        return jsonify({"error": "companies list is empty"}), 400
+    results = extract_parallel(companies, max_workers=min(8, len(companies)))
+    return jsonify({"financials": financials_to_csv_rows(results)})
+
+
 @app.route("/extract", methods=["POST"])
 def extract():
     raw = request.form.get("companies", "")
